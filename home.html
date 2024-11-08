@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="top-bar">
+        <button class="toggle-button" onclick="toggleSidebar()">☰</button>
+
+        <div class="view-buttons">
+            <button id="list-view">List View</button>
+            <button id="grid-view">Grid View</button>
+        </div>
+
+        <div class="top-right-buttons">
+            <button id="add-content-button">Add Content</button>
+            <button id="logout-button" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <button id="all-button">All</button>
+            <button id="video-button">Video</button>
+            <button id="pdf-button">PDF</button>
+            <button id="image-button">Image</button>
+            <button id="docs-button">Docs</button>
+        </div>
+    </div>
+
+    <div class="content" id="content">
+    </div>
+
+    <script src="home.js"></script>
+</body>
+</html>
