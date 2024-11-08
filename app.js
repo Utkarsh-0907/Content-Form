@@ -1,4 +1,3 @@
-
 function checkLogin() {
   const currentUser = localStorage.getItem("currentUser");
   if (!currentUser) {

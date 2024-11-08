@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Content</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="containerNew">
+        <h2>Add New Content</h2>
+        <form id="addContentForm">
+            <input type="text" id="title" placeholder="Enter title" required />
+
+            <select id="content-type" required>
+                <option value="" disabled selected>Select content type</option>
+                <option value="video">Video</option>
+                <option value="pdf">PDF</option>
+                <option value="image">Image</option>
+                <option value="doc">Document</option>
+            </select>
+
+            <input type="url" id="content-url" placeholder="Enter URL" style="display: none;" />
+
+            <label>
+                <input type="checkbox" id="terms" required /> Visibility
+            </label>
+
+            <button type="button" id="preview-button">Preview</button>
+            <button type="submit" id="save-button">Save</button>
+        </form>
+        
+    </div>
+    <div id="content"></div>
+
+    <script src="add-content.js"></script>
+</body>
+</html>
