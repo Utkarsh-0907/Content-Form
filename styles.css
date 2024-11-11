@@ -7,7 +7,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
 
 .container {
@@ -300,7 +299,9 @@ body {
 }
 
 .content-card {
-    width: calc(100% / 4 - 20px); 
+    position: relative;
+    width: 500px; 
+    /* width: calc(100% / 4 - 20px);  */
     max-width: 200px; 
     height: 300px;
     border: 1px solid #333;
@@ -356,6 +357,137 @@ body {
         width: 100%; 
     }
 }
+
+
+.edit-icon-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
+    z-index: 2;
+    transition: transform 0.2s;
+  }
+  
+  .edit-icon-container:hover {
+    transform: scale(1.1);
+  }
+  
+  .edit-icon {
+    fill: #444;
+  }
+  
+  .edit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .edit-modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+  }
+  
+  .edit-modal-content h2 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .edit-modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .edit-modal-content label{
+    color: #333;
+  }
+  
+  .edit-modal-content input[type="text"],
+  .edit-modal-content input[type="url"],
+  .edit-modal-content select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .edit-modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  
+  .edit-modal-buttons button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+ 
+  
+  .edit-modal-buttons button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .edit-modal-buttons .cancel-button {
+    background-color: #f44336;
+    color: white;
+  }
+
+.content-header {
+    padding: 16px;
+    background-color: #fafbf9; 
+    border-bottom: 1px solid #ddd; 
+    /* margin-bottom: 16px;  */
+    text-align: center; 
+    width: auto;
+    margin-top: 60px;
+
+    
+}
+
+.content-header h2 {
+    font-size: 1.5rem; 
+    color: #333; 
+    margin: 0;
+    font-weight: bold; 
+}
+
+#con{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}  
+
+.search-container {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  #search-input {
+    padding: 8px 12px;
+    width: 300px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 40px;
+    margin-top: 10px;
+  }
+  
+
 
 
 
