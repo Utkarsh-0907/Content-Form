@@ -486,6 +486,10 @@ body {
     border-radius: 40px;
     margin-top: 10px;
   }
+
+  .content-card.hidden {
+    display: none;
+  }
   
 
 

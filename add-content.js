@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const contentUrl = document.getElementById("content-url").value;
     const termsAccepted = document.getElementById("terms").checked;
 
-    if (title === "" || contentType === "" || !termsAccepted) {
+    if (title === "" || contentType === "") {
       alert("Please fill in all fields and accept the terms.");
       return;
     }
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const contentUrl = document.getElementById("content-url").value;
     const termsAccepted = document.getElementById("terms").checked;
 
-    if (title === "" || contentType === "" || !termsAccepted) {
+    if (title === "" || contentType === "") {
       alert("Please fill in all fields and accept the terms.");
       return;
     }

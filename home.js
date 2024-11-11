@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const selectedFilterHeading = document.getElementById("selected-filter");
 
   let contentData = JSON.parse(localStorage.getItem("contentData")) || [];
+  let currentPage = 1;
+  const itemsPerPage = 10;
 
   if (!Array.isArray(contentData)) {
     contentData = [];
@@ -20,8 +22,11 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function addContentCard(content, index) {
-    if (!content.terms) return;
-
+    if (!content.terms) {
+      contentDiv.classList.add("hidden");
+    } else {
+      contentDiv.classList.remove("hidden");
+    }
     const card = document.createElement("div");
     card.classList.add("content-card");
 
@@ -114,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <label>
             <input type="checkbox" id="edit-terms" ${
               content.terms ? "checked" : ""
-            } required /> 
+            }/> 
             Visibility
           </label>
           
@@ -196,6 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   let currentFilter = "all";
+  let showHiddenContent = false;
 
   function filterContent(type) {
     const searchTerm = searchInput.value.toLowerCase();
@@ -208,15 +214,33 @@ document.addEventListener("DOMContentLoaded", function () {
       pdf: "PDFs",
       image: "Images",
       doc: "Documents",
+      hidden: "Hidden Content",
     };
     selectedFilterHeading.textContent = filterHeadingText[type];
 
     contentData
-      .filter(
-        (content) =>
-          (type === "all" || content.type === type) &&
-          content.title.toLowerCase().includes(searchTerm)
-      )
+      .filter((content) => {
+        if (type === "all" || content.type === type) {
+          return (
+            content.terms === true &&
+            content.title.toLowerCase().includes(searchTerm)
+          );
+        }
+
+        if (type === "hidden") {
+          return (
+            content.terms === false &&
+            content.title.toLowerCase().includes(searchTerm)
+          );
+        }
+
+        return (
+          type === "hidden" &&
+          content.terms === false &&
+          content.title.toLowerCase().includes(searchTerm) &&
+          content.terms === true
+        );
+      })
       .forEach((content, index) => addContentCard(content, index));
     if (searchTerm.length > 0) {
       return;
@@ -240,14 +264,8 @@ document.addEventListener("DOMContentLoaded", function () {
     .getElementById("docs-button")
     .addEventListener("click", () => filterContent("doc"));
 
-  document.getElementById("list-view").addEventListener("click", () => {
-    contentDiv.classList.add("list-view");
-    contentDiv.classList.remove("grid-view");
-  });
-
-  document.getElementById("grid-view").addEventListener("click", () => {
-    contentDiv.classList.add("grid-view");
-    contentDiv.classList.remove("list-view");
+  document.getElementById("hidden").addEventListener("click", () => {
+    filterContent("hidden");
   });
 });
 
