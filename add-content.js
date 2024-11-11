@@ -5,31 +5,53 @@ document.addEventListener("DOMContentLoaded", function () {
   const contentTypeSelect = document.getElementById("content-type");
   const contentUrlInput = document.getElementById("content-url");
 
+  const titleError = document.getElementById("title-error");
+  const contentTypeError = document.getElementById("content-type-error");
+  const contentUrlError = document.getElementById("content-url-error");
+  const termsError = document.getElementById("terms-error");
+
   contentTypeSelect.addEventListener("change", function () {
     const selectedType = contentTypeSelect.value;
-
-    if (
+    contentUrlInput.style.display =
       selectedType === "video" ||
       selectedType === "pdf" ||
       selectedType === "image" ||
       selectedType === "doc"
-    ) {
-      contentUrlInput.style.display = "block";
-    } else {
-      contentUrlInput.style.display = "none";
-    }
+        ? "block"
+        : "none";
+    validateContentUrl();
   });
 
-  previewButton.addEventListener("click", function () {
-    const title = document.getElementById("title").value;
-    const contentType = document.getElementById("content-type").value;
-    const contentUrl = document.getElementById("content-url").value;
-    const termsAccepted = document.getElementById("terms").checked;
+  document.getElementById("title").addEventListener("input", validateTitle);
+  contentTypeSelect.addEventListener("input", validateContentType);
+  contentUrlInput.addEventListener("input", validateContentUrl);
+  document.getElementById("terms").addEventListener("change", validateTerms);
 
-    if (title === "" || contentType === "") {
-      alert("Please fill in all fields and accept the terms.");
-      return;
+  function validateTitle() {
+    if (document.getElementById("title").value.trim() === "") {
+      titleError.textContent = "Title is required.";
+      titleError.style.display = "block";
+      return false;
+    } else {
+      titleError.style.display = "none";
+      return true;
     }
+  }
+
+  function validateContentType() {
+    if (contentTypeSelect.value === "") {
+      contentTypeError.textContent = "Please select a content type.";
+      contentTypeError.style.display = "block";
+      return false;
+    } else {
+      contentTypeError.style.display = "none";
+      return true;
+    }
+  }
+
+  function validateContentUrl() {
+    const contentType = contentTypeSelect.value;
+    const contentUrl = contentUrlInput.value.trim();
 
     if (
       (contentType === "video" && !contentUrl.endsWith(".mp4")) ||
@@ -41,66 +63,66 @@ document.addEventListener("DOMContentLoaded", function () {
         !contentUrl.endsWith(".doc") &&
         !contentUrl.endsWith(".docx"))
     ) {
-      alert(
-        `Please enter a valid URL for the selected content type: ${contentType}`
-      );
-      return;
+      contentUrlError.textContent = `Please enter a valid URL for ${contentType}.`;
+      contentUrlError.style.display = "block";
+      return false;
+    } else {
+      contentUrlError.style.display = "none";
+      return true;
     }
+  }
 
-    alert(
-      `Previewing: \nTitle: ${title}\nContent Type: ${contentType}\nURL: ${contentUrl}\nTerms Accepted: ${termsAccepted}`
-    );
+  function validateTerms() {
+    if (!document.getElementById("terms").checked) {
+      termsError.textContent = "You must accept the terms.";
+      termsError.style.display = "block";
+      return false;
+    } else {
+      termsError.style.display = "none";
+      return true;
+    }
+  }
+
+  previewButton.addEventListener("click", function () {
+    if (
+      validateTitle() &
+      validateContentType() &
+      validateContentUrl() &
+      validateTerms()
+    ) {
+      alert(
+        `Previewing: \nTitle: ${
+          document.getElementById("title").value
+        }\nContent Type: ${contentTypeSelect.value}\nURL: ${
+          contentUrlInput.value
+        }\nTerms Accepted: ${document.getElementById("terms").checked}`
+      );
+    }
   });
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
 
-    const title = document.getElementById("title").value;
-    const contentType = document.getElementById("content-type").value;
-    const contentUrl = document.getElementById("content-url").value;
-    const termsAccepted = document.getElementById("terms").checked;
-
-    if (title === "" || contentType === "") {
-      alert("Please fill in all fields and accept the terms.");
-      return;
-    }
-
     if (
-      (contentType === "video" && !contentUrl.endsWith(".mp4")) ||
-      (contentType === "pdf" && !contentUrl.endsWith(".pdf")) ||
-      (contentType === "image" &&
-        !contentUrl.endsWith(".jpg") &&
-        !contentUrl.endsWith(".png")) ||
-      (contentType === "doc" &&
-        !contentUrl.endsWith(".doc") &&
-        !contentUrl.endsWith(".docx"))
+      validateTitle() &
+      validateContentType() &
+      validateContentUrl() &
+      validateTerms()
     ) {
-      alert(
-        `Please enter a valid URL for the selected content type: ${contentType}`
-      );
-      return;
+      const contentData = {
+        title: document.getElementById("title").value,
+        type: contentTypeSelect.value,
+        url: contentUrlInput.value,
+        terms: document.getElementById("terms").checked,
+      };
+
+      let existingData = JSON.parse(localStorage.getItem("contentData")) || [];
+      existingData.push(contentData);
+      localStorage.setItem("contentData", JSON.stringify(existingData));
+
+      window.location.href = "home.html";
+      alert("Content saved successfully!");
+      form.reset();
     }
-
-    const contentData = {
-      title: title,
-      type: contentType,
-      url: contentUrl,
-      terms: termsAccepted,
-    };
-
-    let existingData = JSON.parse(localStorage.getItem("contentData"));
-
-    if (!Array.isArray(existingData)) {
-      existingData = [];
-    }
-
-    existingData.push(contentData);
-
-    localStorage.setItem("contentData", JSON.stringify(existingData));
-
-    window.location.href = "home.html";
-
-    alert("Content saved successfully!");
-    form.reset();
   });
 });

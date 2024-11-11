@@ -1,25 +1,149 @@
 document.addEventListener("DOMContentLoaded", function () {
   const contentDiv = document.getElementById("content");
   const selectedFilterHeading = document.getElementById("selected-filter");
+  const paginationContainer = document.createElement("div");
+  paginationContainer.classList.add("pagination");
+  contentDiv.parentNode.insertBefore(
+    paginationContainer,
+    contentDiv.nextSibling
+  );
 
   let contentData = JSON.parse(localStorage.getItem("contentData")) || [];
-  let currentPage = 1;
+  
   const itemsPerPage = 10;
 
   if (!Array.isArray(contentData)) {
     contentData = [];
   }
-  contentData.forEach((content, index) => addContentCard(content, index));
+  function getUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      page: parseInt(params.get("page")) || 1,
+      filter: params.get("filter") || "all",
+      search: params.get("search") || "",
+    };
+  }
+
+  function updateUrl(page, filter, search) {
+    const url = new URL(window.location);
+    url.searchParams.set("page", page);
+    url.searchParams.set("filter", filter);
+    if (search) {
+      url.searchParams.set("search", search);
+    } else {
+      url.searchParams.delete("search");
+    }
+    window.history.pushState({}, "", url);
+  }
+
+  const urlParams = getUrlParams();
+  let currentPage = urlParams.page;
+  let currentFilter = urlParams.filter;
+
+  const searchInput = document.getElementById("search-input");
+  searchInput.value = urlParams.search;
 
   let debounceTimeout;
 
-  const searchInput = document.getElementById("search-input");
   searchInput.addEventListener("input", () => {
     clearTimeout(debounceTimeout);
     debounceTimeout = setTimeout(() => {
+      currentPage = 1; 
+      const searchTerm = searchInput.value;
+      updateUrl(currentPage, currentFilter, searchTerm);
       filterContent(currentFilter);
     }, 500);
   });
+
+  window.addEventListener("popstate", () => {
+    const params = getUrlParams();
+    currentPage = params.page;
+    currentFilter = params.filter;
+    searchInput.value = params.search;
+    filterContent(currentFilter, true);
+  });
+
+  function renderPagination(filteredItems) {
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+    paginationContainer.innerHTML = "";
+
+    if (totalPages <= 1) {
+      return;
+    }
+
+    const prevButton = document.createElement("button");
+    prevButton.textContent = "Previous";
+    prevButton.classList.add("pagination-btn");
+    prevButton.disabled = currentPage === 1;
+    prevButton.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        updateUrl(currentPage, currentFilter, searchInput.value);
+        filterContent(currentFilter);
+      }
+    });
+    paginationContainer.appendChild(prevButton);
+
+    const createPageButton = (pageNum) => {
+      const pageButton = document.createElement("button");
+      pageButton.textContent = pageNum;
+      pageButton.classList.add("pagination-btn");
+      if (pageNum === currentPage) {
+        pageButton.classList.add("active");
+      }
+      pageButton.addEventListener("click", () => {
+        currentPage = pageNum;
+        updateUrl(currentPage, currentFilter, searchInput.value);
+        filterContent(currentFilter);
+      });
+      return pageButton;
+    };
+
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    if (startPage > 1) {
+      paginationContainer.appendChild(createPageButton(1));
+      if (startPage > 2) {
+        const ellipsis = document.createElement("span");
+        ellipsis.textContent = "...";
+        ellipsis.classList.add("pagination-ellipsis");
+        paginationContainer.appendChild(ellipsis);
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      paginationContainer.appendChild(createPageButton(i));
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        const ellipsis = document.createElement("span");
+        ellipsis.textContent = "...";
+        ellipsis.classList.add("pagination-ellipsis");
+        paginationContainer.appendChild(ellipsis);
+      }
+      paginationContainer.appendChild(createPageButton(totalPages));
+    }
+
+    const nextButton = document.createElement("button");
+    nextButton.textContent = "Next";
+    nextButton.classList.add("pagination-btn");
+    nextButton.disabled = currentPage === totalPages;
+    nextButton.addEventListener("click", () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        updateUrl(currentPage, currentFilter, searchInput.value);
+        filterContent(currentFilter);
+      }
+    });
+    paginationContainer.appendChild(nextButton);
+  }
 
   function addContentCard(content, index) {
     if (!content.terms) {
@@ -200,10 +324,8 @@ document.addEventListener("DOMContentLoaded", function () {
     filterContent(currentFilter);
   }
 
-  let currentFilter = "all";
-  let showHiddenContent = false;
 
-  function filterContent(type) {
+  function filterContent(type, skipPushState = false) {
     const searchTerm = searchInput.value.toLowerCase();
     currentFilter = type;
     contentDiv.innerHTML = "";
@@ -218,54 +340,89 @@ document.addEventListener("DOMContentLoaded", function () {
     };
     selectedFilterHeading.textContent = filterHeadingText[type];
 
-    contentData
-      .filter((content) => {
-        if (type === "all" || content.type === type) {
-          return (
-            content.terms === true &&
-            content.title.toLowerCase().includes(searchTerm)
-          );
-        }
-
-        if (type === "hidden") {
-          return (
-            content.terms === false &&
-            content.title.toLowerCase().includes(searchTerm)
-          );
-        }
-
+    const filteredItems = contentData.filter((content) => {
+      if (type === "all" || content.type === type) {
         return (
-          type === "hidden" &&
-          content.terms === false &&
-          content.title.toLowerCase().includes(searchTerm) &&
-          content.terms === true
+          content.terms === true &&
+          content.title.toLowerCase().includes(searchTerm)
         );
-      })
-      .forEach((content, index) => addContentCard(content, index));
+      }
+
+      if (type === "hidden") {
+        return (
+          content.terms === false &&
+          content.title.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      return false;
+    });
+
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+    if (currentPage > totalPages) {
+      currentPage = totalPages || 1;
+      if (!skipPushState) {
+        updateUrl(currentPage, currentFilter, searchInput.value);
+      }
+    }
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedItems = filteredItems.slice(startIndex, endIndex);
+
+    paginatedItems.forEach((content, index) => {
+      addContentCard(content, startIndex + index);
+    });
+
+    renderPagination(filteredItems);
+
     if (searchTerm.length > 0) {
       return;
     }
-    toggleSidebar();
+    sidebar.classList.remove("open");
+    content.style.marginLeft = "0";
   }
 
-  document
-    .getElementById("all-button")
-    .addEventListener("click", () => filterContent("all"));
-  document
-    .getElementById("video-button")
-    .addEventListener("click", () => filterContent("video"));
-  document
-    .getElementById("pdf-button")
-    .addEventListener("click", () => filterContent("pdf"));
-  document
-    .getElementById("image-button")
-    .addEventListener("click", () => filterContent("image"));
-  document
-    .getElementById("docs-button")
-    .addEventListener("click", () => filterContent("doc"));
-
+  document.getElementById("all-button").addEventListener("click", () => {
+    currentPage = 1;
+    updateUrl(currentPage, "all", searchInput.value);
+    filterContent("all");
+  });
+  document.getElementById("video-button").addEventListener("click", () => {
+    currentPage = 1;
+    updateUrl(currentPage, "video", searchInput.value);
+    filterContent("video");
+  });
+  document.getElementById("pdf-button").addEventListener("click", () => {
+    currentPage = 1;
+    updateUrl(currentPage, "pdf", searchInput.value);
+    filterContent("pdf");
+  });
+  document.getElementById("image-button").addEventListener("click", () => {
+    currentPage = 1;
+    updateUrl(currentPage, "image", searchInput.value);
+    filterContent("image");
+  });
+  document.getElementById("docs-button").addEventListener("click", () => {
+    currentPage = 1;
+    updateUrl(currentPage, "doc", searchInput.value);
+    filterContent("doc");
+  });
   document.getElementById("hidden").addEventListener("click", () => {
+    currentPage = 1;
+    updateUrl(currentPage, "hidden", searchInput.value);
     filterContent("hidden");
+  });
+
+  filterContent(currentFilter);
+  document.getElementById("list-view").addEventListener("click", () => {
+    contentDiv.classList.add("list-view");
+    contentDiv.classList.remove("grid-view");
+  });
+
+  document.getElementById("grid-view").addEventListener("click", () => {
+    contentDiv.classList.add("grid-view");
+    contentDiv.classList.remove("list-view");
   });
 });
 
@@ -285,4 +442,3 @@ function logout() {
   localStorage.removeItem("password");
   window.location.href = "login.html";
 }
-``;

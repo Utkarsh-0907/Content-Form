@@ -3,15 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
+    <title>Home</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome</h1>
-        <button onclick="window.location.href='signup.html'">Sign Up</button>
-        <button onclick="window.location.href='login.html'">Log In</button>
+    <div class="top-bar">
+        <div class="view-buttons">
+            <button id="list-view">List View</button>
+            <button id="grid-view">Grid View</button>
+            
+        </div>
+        
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search by title..." />
+        </div>
+        
+        <div class="top-right-buttons">
+            <button onclick="window.location.href='signup.html'">Sign Up</button>
+            <button onclick="window.location.href='login.html'">Log In</button>
+        </div>
     </div>
+
+    <div class="content-container" id="con">
+        <div class="content-header">
+            
+            <h2 id="selected-filter">All Content</h2>
+        </div>
+        
+        <div class="content grid-view" id="content"></div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
